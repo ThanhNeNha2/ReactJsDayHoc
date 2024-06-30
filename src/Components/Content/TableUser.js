@@ -1,11 +1,13 @@
-import React, { Component, useEffect } from "react";
+import React, { Component } from "react";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
 import { FadeLoader } from "react-spinners";
-
 import "../../App.scss";
 import { toast } from "react-toastify";
+import Lightbox from "react-image-lightbox";
+import "react-image-lightbox/style.css";
+import ReactPaginate from "react-paginate";
 export default class TableUser extends Component {
   constructor(props) {
     super(props);
@@ -13,16 +15,26 @@ export default class TableUser extends Component {
       users: [],
       isLoading: true,
       error: null,
+      photoIndex: "",
+      isOpen: false,
+      totalPages: 0,
     };
   }
 
   async componentDidMount() {
+    this.getAllUser(1);
+  }
+
+  getAllUser = (value) => {
     setTimeout(async () => {
       try {
-        let res = await axios.get("https://reqres.in/api/users?page=2");
+        let res = await axios.get(`https://reqres.in/api/users?page=${value}`);
+
         this.setState({
           users: res.data.data,
           isLoading: false,
+          // giả vờ res.total_pages rồi hỏi
+          totalPages: res.data.total_pages,
         });
       } catch (error) {
         this.setState({
@@ -31,13 +43,15 @@ export default class TableUser extends Component {
         });
       }
     }, 10);
-  }
+  };
   handleDelete = () => {
     toast.error("lỗi rôi nha ");
   };
-
+  handlePageClick = (event) => {
+    this.getAllUser(event.selected + 1);
+  };
   render() {
-    console.log("listUser ", this.state.users);
+    const { photoIndex, isOpen } = this.state;
     return (
       <div>
         <Table striped bordered hover variant="white">
@@ -76,9 +90,16 @@ export default class TableUser extends Component {
                     <td>{item.first_name}</td>
                     <td>{item.last_name}</td>
                     <td>
-                      <img src={item.avatar} />
+                      <img
+                        src={item.avatar}
+                        onClick={() =>
+                          this.setState({
+                            isOpen: true,
+                            photoIndex: item.avatar,
+                          })
+                        }
+                      />
                     </td>
-
                     <td>
                       {" "}
                       <button
@@ -97,6 +118,41 @@ export default class TableUser extends Component {
             )}
           </tbody>
         </Table>
+
+        {isOpen && (
+          <Lightbox
+            mainSrc={photoIndex}
+            nextSrc={photoIndex}
+            prevSrc={photoIndex}
+            onCloseRequest={() => this.setState({ isOpen: false })}
+            onMovePrevRequest={() => {}}
+            onMoveNextRequest={() => {}}
+          />
+        )}
+        <ReactPaginate
+          nextLabel="next >"
+          // thya doi trang
+          onPageChange={this.handlePageClick}
+          //pham vi cac trang hien thi
+          pageRangeDisplayed={2}
+          // so trang hien thi cho le
+          marginPagesDisplayed={2}
+          // so trang
+          pageCount={this.state.totalPages}
+          previousLabel="< previous"
+          pageClassName="page-item"
+          pageLinkClassName="page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link"
+          breakLabel="..."
+          breakClassName="page-item"
+          breakLinkClassName="page-link"
+          containerClassName="pagination"
+          activeClassName="active"
+          renderOnZeroPageCount={null}
+        />
       </div>
     );
   }
