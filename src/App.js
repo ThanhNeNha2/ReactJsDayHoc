@@ -1,7 +1,7 @@
-import TableUser from "./Components/Content/TableUser";
 import Header from "./Components/Header/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TableUser from "./Components/Content/TableUser.1";
 function App() {
   return (
     <div className="App">
