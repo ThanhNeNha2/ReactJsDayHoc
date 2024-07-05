@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { FadeLoader } from "react-spinners";
 import "./TableUser.scss";
+import DeleteModal from "../Modal/DeleteModal";
 export default class TableUser extends Component {
   constructor(props) {
     super(props);
@@ -12,6 +13,8 @@ export default class TableUser extends Component {
       users: [],
       isLoading: true,
       error: false,
+      isShowModal: false,
+      userDelete: {},
     };
   }
 
@@ -33,10 +36,25 @@ export default class TableUser extends Component {
     }, 500);
   }
 
-  handleDelete = () => {
-    toast.error("lỗi rôi nha ");
+  // phân xóa người dùng
+  handleDelete = (item) => {
+    this.setState({
+      isShowModal: true,
+      userDelete: item,
+    });
   };
-
+  handleClose = () => {
+    this.setState({
+      isShowModal: false,
+    });
+  };
+  NewListUsers = (userDelete) => {
+    let newUser = this.state.users;
+    delete newUser[userDelete - 1];
+    this.setState({
+      users: newUser,
+    });
+  };
   render() {
     return (
       <div>
@@ -89,7 +107,7 @@ export default class TableUser extends Component {
                         {" "}
                         <button
                           onClick={() => {
-                            this.handleDelete();
+                            this.handleDelete(item);
                           }}
                           className="btn btn-success"
                         >
@@ -104,6 +122,12 @@ export default class TableUser extends Component {
             )}
           </tbody>
         </Table>
+        <DeleteModal
+          handleShow={this.state.isShowModal}
+          handleClose={this.handleClose}
+          infoUser={this.state.userDelete}
+          NewListUsers={this.NewListUsers}
+        />
       </div>
     );
   }
